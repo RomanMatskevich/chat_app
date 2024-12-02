@@ -10,7 +10,7 @@ export class User {
     lastName: string;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chat' }] })
-  chats: mongoose.Schema.Types.ObjectId[]; 
+    chats: mongoose.Schema.Types.ObjectId[]; 
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

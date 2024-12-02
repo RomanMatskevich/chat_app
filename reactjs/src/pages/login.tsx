@@ -43,14 +43,14 @@ export default function Login() {
         className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md"
       >
         <h1 className="text-2xl font-bold text-center mb-6">
-          Input your account ID
+          Login
         </h1>
         <div className="mb-4">
           <label
             htmlFor="userId"
             className="block text-gray-700 font-semibold mb-2"
           >
-            Your ID
+            login
           </label>
           <input
             type="text"

@@ -51,7 +51,7 @@ export class MessageService {
         sender: senderObject._id,
         text,
       });
-      const createdMessage = await newMessage.save();
+      const createdMessage = (await newMessage.save()).populate({ path: 'sender', select: ['name', '_id']});
       return createdMessage
     } catch (error) {
       console.error('Error in createMessage:', error.message);
@@ -68,7 +68,13 @@ export class MessageService {
 
   async getMessages(id: string) {
     try {
-      const messages = await this.messageModel.find({ chat: id }).exec();
+      const messages = await this.messageModel
+        .find({ chat: id })
+        .populate({
+          path: 'sender',
+          select: ['name', '_id']
+        }).
+        exec();
       return messages;
     } catch (error) {
       throw new Error(`Error retrieving messages: ${error.message}`);

@@ -30,12 +30,12 @@ export default function ChatField() {
               <div
                 key={index}
                 className={`mb-2 p-2 max-w-sm rounded-md ${
-                  message.sender === user._id
+                  message.sender._id === user._id
                     ? "bg-blue-500 text-white ml-auto text-right"
                     : "bg-gray-200 text-black"
                 }`}
               >
-                <div className="text-sm font-semibold">{message.sender}</div>
+                <div className="text-sm font-semibold">{message.sender.name}</div>
                 <div>{message.text}</div>
               </div>
             ))}

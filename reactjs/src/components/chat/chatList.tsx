@@ -6,16 +6,22 @@ import { User } from "../../types";
 export default function ChatList() {
   const user = useStore((state: StoreState) => state.user);
   const activeChatId = useStore((state: StoreState) => state.activeChatId);
-  const setActiveChatId = useStore((state: StoreActions) => state.setActiveChatId);
+  const setActiveChatId = useStore(
+    (state: StoreActions) => state.setActiveChatId
+  );
   const setMessages = useStore((state: StoreActions) => state.setMessages);
-  const addChatToUser = useStore((state: StoreActions) => state.setMessages)
+  // const addChatToUser = useStore((state: StoreActions) => state.addChatToUser);
   const chats = user.chats;
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<User[]>([]); 
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_HTTP_SERVER_URL}/message/get/${activeChatId}`);
+        const response = await fetch(
+          `${process.env.REACT_APP_HTTP_SERVER_URL}/message/get/${activeChatId}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch data");
         }
@@ -41,7 +47,6 @@ export default function ChatList() {
         const response = await fetch(
           `${process.env.REACT_APP_HTTP_SERVER_URL}/user/search?name=${name}&lastName=${lastName}`
         );
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to fetch users");
         }
@@ -54,7 +59,16 @@ export default function ChatList() {
       setSearchResults([]);
     }
   };
-  const createChat = async (userId: string) => {
+
+  const handleUserSelect = (user: User) => {
+    if (selectedUsers.some((u) => u._id === user._id)) {
+      setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
+    } else {
+      setSelectedUsers([...selectedUsers, user]);
+    }
+  };
+
+  const createChat = async () => {
     try {
       const response = await fetch(
         `${process.env.REACT_APP_HTTP_SERVER_URL}/chats/create`,
@@ -64,19 +78,18 @@ export default function ChatList() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: "name",
-            participants: [user._id, userId],
+            name: "New Group Chat",
+            participants: [user._id, ...selectedUsers.map((u) => u._id)],
           }),
         }
       );
-      console.log(response);
       if (!response.ok) {
-        throw new Error("Failed to fetch users");
+        throw new Error("Failed to create chat");
       }
-      setSearchQuery("")
       const chat = await response.json();
-      setActiveChatId(chat._id)
-      addChatToUser(chat._id)
+      setActiveChatId(chat._id);
+      setSearchQuery("");
+      setSelectedUsers([]);
     } catch (error) {
       console.log(error);
     }
@@ -84,7 +97,9 @@ export default function ChatList() {
 
   return (
     <aside className="w-1/3 border-r bg-gray-100">
-      <div className="p-4 font-bold text-lg">Чаты</div>
+      <div className="p-4 font-bold text-lg flex justify-between">
+        <span>{user.name}`s</span> Чати
+      </div>
       <div className="p-4">
         <input
           type="text"
@@ -96,15 +111,17 @@ export default function ChatList() {
       </div>
 
       {searchQuery && (
-        <div className="bg-white p-2 max-h-40 overflow-y-auto shadow-md">
+        <div className="bg-pink-200 p-2 max-h-40 overflow-y-auto shadow-md">
           <ul>
             {searchResults.map((user) => (
               <li
                 key={user._id}
-                className="p-2 cursor-pointer hover:bg-gray-200"
-                onClick={() => {
-                  user._id && createChat(user._id);
-                }}
+                className={`p-2 cursor-pointer hover:bg-gray-200 ${
+                  selectedUsers.some((u) => u._id === user._id)
+                    ? "bg-blue-100"
+                    : ""
+                }`}
+                onClick={() => handleUserSelect(user)}
               >
                 {user.name} {user.lastName}
               </li>
@@ -112,6 +129,18 @@ export default function ChatList() {
           </ul>
         </div>
       )}
+
+      {selectedUsers.length > 0 && (
+        <div className="p-4">
+          <button
+            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={createChat}
+          >
+            Створити чат ({selectedUsers.length} користувачів)
+          </button>
+        </div>
+      )}
+
       <ul>
         {chats.map((chat) => (
           <li

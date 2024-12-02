@@ -17,6 +17,9 @@ export type User = {
 
 export type Message = {
     chat: string,
-    sender: string,
+    sender: {
+        _id: string | null,
+        name: string | null
+    },
     text: string
 }

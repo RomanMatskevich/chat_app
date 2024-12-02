@@ -1,15 +1,15 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
+import mongoose from "mongoose";
 
 @Schema({ timestamps: true })
 export class Message {
-    @Prop({ required: true, type: String, ref: 'Chat' })
-    chat: string; 
+    @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Chat' })
+    chat: mongoose.Schema.Types.ObjectId; 
   
-    @Prop({ required: true, type: String, ref: 'User' })
-    sender: string; 
+    @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    sender: mongoose.Schema.Types.ObjectId; 
   
     @Prop({ required: true })
     text: string; 
 }
-
 export const MessageSchema = SchemaFactory.createForClass(Message);
